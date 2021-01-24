@@ -8,6 +8,10 @@ const initialState = {
     isOpenModalAddFileInfo: false,
     isOpenModalTransferFolder: false,
     isOpenModalFileSubmit: false,
+    isOpenModalSelectForm: false,
+    isOpenModalShareAction: false,
+    isFromHome: false,
+    isOpenSort: true
 }
 
 export default system = (state = initialState, action) => {
@@ -46,6 +50,26 @@ export default system = (state = initialState, action) => {
             return { ...state, isOpenModalFileSubmit: true }
         case types.CLOSE_MODAL_FILE_SUBMIT:
             return { ...state, isOpenModalFileSubmit: false }
+
+        case types.OPEN_MODAL_SELECT_FORM:
+            return { ...state, isOpenModalSelectForm: true }
+        case types.CLOSE_MODAL_SELECT_FORM:
+            return { ...state, isOpenModalSelectForm: false }
+
+        case types.OPEN_MODAL_SHARE_ACTION:
+            return { ...state, isOpenModalShareAction: true }
+        case types.CLOSE_MODAL_SHARE_ACTION:
+            return { ...state, isOpenModalShareAction: false }
+
+        case types.IS_FROM_HOME:
+            return { ...state, isFromHome: true }
+        case types.IS_NOT_FROM_HOME:
+            return { ...state, isFromHome: false }
+
+        case types.OPEN_MODAL_SORT:
+            return { ...state, isOpenSort: true }
+        case types.CLOSE_MODAL_SORT:
+            return { ...state, isOpenSort: false }
 
         default:
             return state;

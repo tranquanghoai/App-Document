@@ -1,7 +1,8 @@
 import axios from 'axios'
 import AsyncStorage from "@react-native-community/async-storage";
 
-const domain = 'https://api.bk.document.bentrinh.asia/'
+// export const domain = 'https://api.bk.document.bentrinh.asia/'
+export const domain = 'http://192.168.0.114:3000/'
 import RNFetchBlob from 'rn-fetch-blob';
 import store from '../store'
 export default class BaseService {

@@ -14,6 +14,11 @@ export default class AuthService extends BaseService {
 		return res.data
 	}
 
+	async checkLogin(authentication = {}) {
+		const res = await this.post(this.slug + `/check-signin`, authentication)
+		return res.data
+	}
+
 	async getList(params = {}) {
 		try {
 			const res = await this.get(this.slug + `list-folder?${$param(params)}`)

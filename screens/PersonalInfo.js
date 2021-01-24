@@ -17,6 +17,7 @@ import { resetAuth } from '../store/action/auth'
 
 
 const UserInfo = ({ title, value, icon }) => {
+
     return (
         <View style={{
             flexDirection: 'row',
@@ -66,10 +67,18 @@ const HandleUser = ({ name, icon, color }) => {
 
 export default function PersonalInfo({ navigation }) {
     const dispatch = useDispatch()
+    const employee = useSelector(state => state.auth.employee)
     const onHanldeLogout = async () => {
-        await AsyncStorage.clear()
-        navigation.navigate('Login')
-        dispatch(resetAuth())
+
+        global.props.showConfirm(
+            'Đăng Xuất',
+            'Bạn có muốn đăng xuất khỏi tài khoản?',
+            async () => {
+                await AsyncStorage.clear()
+                navigation.navigate('Login')
+                dispatch(resetAuth())
+            }
+        )
     }
     return (
         <View style={{
@@ -88,74 +97,65 @@ export default function PersonalInfo({ navigation }) {
                     </Left>
                     <Body style={{
                         flex: 1,
-                        // backgroundColor: 'green'
                     }}>
-                        {/* <Title style={{
-                            color: '#000'
-                        }}>Thông Tin Cá Nhân</Title> */}
                         <Text style={{
                             fontSize: 18,
-                            // backgroundColor: 'red'
                             fontWeight: 'bold'
                         }}>
                             Thông Tin Cá Nhân
                         </Text>
                     </Body>
-                    {/* <Right>
-                        <TouchableOpacity onPress={() => { }}>
-                            <Button transparent>
-                                <Entypo name="save" color="#f57811" size={25} />
-                            </Button>
-                        </TouchableOpacity>
-                    </Right> */}
                 </Header>
-                <View style={{
-                    margin: 20
-                }}>
-                    <View style={{
-                        marginVertical: 20
-                    }}>
-                        <Image
-                            style={[
-                                {
-                                    width: 80,
-                                    height: 80,
-                                    borderRadius: 80,
-                                    alignSelf: 'center',
-                                }
-                            ]}
-                            source={{ uri: "https://www.bridgestorecovery.com/wp-content/uploads/2017/10/Understanding-BPD-Emotional-Manipulation-Techniques-and-How-Treatment-Can-Help-1280x720.jpg" }}
-                        />
-                        <Text style={{
-                            alignSelf: 'center',
-                            fontSize: 18,
-                            fontWeight: '400',
-                            marginTop: 8
-                        }}>Tran Quang Hoai</Text>
-                    </View>
-                    <View style={{
-                        marginVertical: 10
-                    }}>
-                        <UserInfo title="Số điện thoại" value="0372781039" icon="phone" />
-                        <UserInfo title="Email" value="tranquanghoai@gmail.com" icon="mail" />
-                        <UserInfo title="Địa chỉ" value="Thành phố Hà Nội" icon="home" />
+                {
+                    employee && (
                         <View style={{
-                            width: 250,
-                            height: 1,
-                            backgroundColor: '#ccc',
-                            alignSelf: 'center',
-                            marginVertical: 20
-                        }} />
-                    </View>
+                            margin: 20
+                        }}>
 
-                    <HandleUser name="Thiết Lập" icon="setting" />
-                    <HandleUser name="Thông Tin" icon="infocirlceo" color="green" />
-                    <TouchableOpacity onPress={onHanldeLogout}>
-                        <HandleUser name="Đăng Xuất" icon="logout" color="red" />
-                    </TouchableOpacity>
+                            <View style={{
+                                marginVertical: 20
+                            }}>
+                                <Image
+                                    style={[
+                                        {
+                                            width: 80,
+                                            height: 80,
+                                            borderRadius: 80,
+                                            alignSelf: 'center',
+                                        }
+                                    ]}
+                                    source={require('../assets/avatar.jpg')}
+                                />
+                                <Text style={{
+                                    alignSelf: 'center',
+                                    fontSize: 18,
+                                    fontWeight: '400',
+                                    marginTop: 8
+                                }}>{employee.username}</Text>
+                            </View>
+                            <View style={{
+                                marginVertical: 10
+                            }}>
+                                <UserInfo title="Số điện thoại" value={employee.phoneNumber} icon="phone" />
+                                <UserInfo title="Email" value={employee.email} icon="mail" />
+                                <UserInfo title="Địa chỉ" value="Thành phố Hồ Chí Minh" icon="home" />
+                                <View style={{
+                                    width: 250,
+                                    height: 1,
+                                    backgroundColor: '#ccc',
+                                    alignSelf: 'center',
+                                    marginVertical: 20
+                                }} />
+                            </View>
 
-                </View>
-
+                            <HandleUser name="Thiết Lập" icon="setting" />
+                            <HandleUser name="Thông Tin" icon="infocirlceo" color="green" />
+                            <TouchableOpacity onPress={onHanldeLogout}>
+                                <HandleUser name="Đăng Xuất" icon="logout" color="red" />
+                            </TouchableOpacity>
+                        </View>
+                    )
+                }
             </Container>
         </View>
         // <View>

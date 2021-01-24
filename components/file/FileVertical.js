@@ -8,10 +8,11 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import FactoryService from '../../service/FactoryService'
 import { useSelector, useDispatch } from "react-redux";
 import { chooseHandleFile } from '../../store/action/file'
-import { openModalFileAction } from '../../store/action/system'
+import { openModalFileAction, isFromHome, isNotFromHome } from '../../store/action/system'
 import moment from 'moment';
+import { domain } from '../../service/BaseService';
 
-export default function FileVertical({ navigation, file }) {
+export default function FileVertical({ navigation, file, type }) {
     const dispatch = useDispatch()
     const accessToken = useSelector(state => state.auth.accessToken)
     const formatDate = (date) => {
@@ -19,7 +20,6 @@ export default function FileVertical({ navigation, file }) {
     }
 
     const onHandlePress = () => {
-        // dispatch(handleChooseFile(file.id))
         if (file.type === 'text') {
             navigation.push('TextFile', {
                 fileId: file.id
@@ -28,14 +28,28 @@ export default function FileVertical({ navigation, file }) {
             navigation.push('ImageFile', {
                 fileId: file.id
             })
+        } else if (file.type === 'form') {
+            navigation.push('FillForm', {
+                fileId: file.id
+            })
         }
     }
 
     const handleOpenHandleFileAction = () => {
         dispatch(chooseHandleFile(file))
         dispatch(openModalFileAction())
+        console.log(type, 'type')
+        console.log(type == 'home', 'type')
+        if (type == 'home') {
+            console.log('Vo home')
+            dispatch(isFromHome())
+        } else {
+            dispatch(isNotFromHome())
+        }
     }
-
+    if (file.attachFileIds && file.attachFileIds.length) {
+        console.log(`${domain}attach-file/${file.attachFileIds[0].id}`)
+    }
     return (
         <TouchableOpacity
             activeOpacity={0.6}
@@ -52,43 +66,73 @@ export default function FileVertical({ navigation, file }) {
                 padding: 8,
             }}>
                 {
-                    file.type === 'image' && file.attachFileIds.length ? (
+                    file.type === 'image' && (
                         <View style={[styles.folderIcon, { justifyContent: "center", alignItems: "center" }]}>
                             <ImageBackground
-                                style={{ flex: 1, width: '100%', padding: 4, justifyContent: "center", alignItems: "center" }}
+                                style={{ flex: 1, width: '90%', marginLeft: 8 }}
                                 source={{
-                                    uri: `http://192.168.1.11:3000/attach-file/${file.attachFileIds[0].id}`,
+                                    uri: file.attachFileIds && file.attachFileIds.length ? `${domain}attach-file/${file.attachFileIds[0].id}` : '',
                                     headers: { Authorization: `Bearer ${accessToken}` }
                                 }}
                             >
-                                {/* {
-                                    file.type === 'text' ? (<Entypo name="text" color="#ccc" size={50} />)
-                                        : (<Entypo name="image" color="#ccc" size={50} />)
-                                } */}
-                            </ImageBackground>
-                        </View>
-                    ) : (
-                            <View style={styles.folderIcon}>
                                 {
-                                    file.type === 'text' && (
+
+                                    file.like && (
                                         <View style={{
-                                            padding: 4,
-                                            borderColor: '#ccc',
-                                            borderWidth: 1
+                                            width: 20,
+                                            height: 20,
+                                            // backgroundColor: 'red',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
                                         }}>
-                                            {
-                                                file.like ? (
-                                                    <Entypo name="star" color="#f57811" size={15} />
-                                                ) : (
-                                                        <View style={{ height: 15 }}></View>
-                                                    )
-                                            }
-                                            <Entypo name="text" color="#ccc" size={50} />
+                                            <Entypo name="star" color="#f57811" size={15} />
                                         </View>
                                     )
                                 }
+                            </ImageBackground>
+                        </View>
+                    )
+                }
+                {
+                    file.type === 'text' && (
+                        <View style={styles.folderIcon}>
+                            <View style={{
+                                padding: 4,
+                                borderColor: '#ccc',
+                                borderWidth: 1
+                            }}>
+                                {
+                                    file.like ? (
+                                        <Entypo name="star" color="#f57811" size={15} />
+                                    ) : (
+                                            <View style={{ height: 15 }}></View>
+                                        )
+                                }
+                                <Entypo name="text" color="#ccc" size={50} />
                             </View>
-                        )
+                        </View>
+                    )
+                }
+
+                {
+                    file.type === 'form' && (
+                        <View style={styles.folderIcon}>
+                            <View style={{
+                                padding: 4,
+                                borderColor: '#ccc',
+                                borderWidth: 1
+                            }}>
+                                {
+                                    file.like ? (
+                                        <Entypo name="star" color="#f57811" size={15} />
+                                    ) : (
+                                            <View style={{ height: 15 }}></View>
+                                        )
+                                }
+                                <AntDesign name="profile" color="#ccc" size={50} />
+                            </View>
+                        </View>
+                    )
                 }
 
                 <View style={{
@@ -124,14 +168,14 @@ export default function FileVertical({ navigation, file }) {
                     width: '5%',
                     justifyContent: "center",
                     alignItems: "flex-end",
-                    padding: 4
+                    padding: 4,
                 }}
                     onPress={handleOpenHandleFileAction}
                 >
                     <Fontisto name="more-v-a" color="#000" size={20} />
                 </TouchableOpacity>
             </View>
-        </ TouchableOpacity>
+        </ TouchableOpacity >
     )
 }
 

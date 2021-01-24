@@ -12,20 +12,26 @@ import { getListFolder, chooseParentFolder } from '../store/action/folder'
 import { getListFile } from '../store/action/file'
 import FileHorizontal from '../components/file/FileHorizontal';
 import FileVertical from '../components/file/FileVertical';
+import { ActivityIndicator } from 'react-native';
+import { Image } from 'react-native';
 
 export default DocumentLike = ({ navigation }) => {
     const [folderIsHorizontal, setFolderHorizontal] = useState(false)
+    const [loading, setLoading] = useState(false)
     const dispatch = useDispatch()
     const folders = useSelector(state => state.folder.folders)
     const files = useSelector(state => state.file.files)
     const parentFolder = useSelector(state => state.folder.parentFolder)
 
-    const fetchData = () => {
+    const fetchData = async () => {
         try {
             const filterFolder = { like: true }
-            dispatch(getListFolder(filterFolder))
-            dispatch(getListFile(filterFolder))
+            setLoading(true)
+            await dispatch(getListFolder(filterFolder))
+            await dispatch(getListFile(filterFolder))
+            setLoading(false)
         } catch (error) {
+            setLoading(false)
             console.log(error, 'error')
         }
     }
@@ -38,8 +44,15 @@ export default DocumentLike = ({ navigation }) => {
     }, [navigation])
 
     useEffect(() => {
+        if (loading) {
+            global.props.showLoading()
+        } else {
+            global.props.hideLoading()
+        }
+    }, [loading]);
+
+    useEffect(() => {
         if (!parentFolder) {
-            console.log('Day ak')
             fetchData()
         }
     }, [parentFolder])
@@ -50,53 +63,134 @@ export default DocumentLike = ({ navigation }) => {
             <Container>
                 <HomeHeader navigation={navigation} />
                 <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                    <View style={styles.scrollViewWrapper}>
-                        <View style={styles.titleArea}>
-                            {
-                                folders && folders.length !== 0 ? (
-                                    <Text style={styles.titleText}>Thư Mục</Text>
-                                ) : (<View></View>)
-                            }
-                            <TouchableOpacity onPress={() => {
-                                setFolderHorizontal(!folderIsHorizontal)
-                            }}>
+                    <View style={[styles.scrollViewWrapper, { paddingBottom: 50 }]}>
+                        <Text style={{
+                            fontSize: 18,
+                            fontWeight: "bold",
+                            marginVertical: 10
+                        }}>Tài Liệu Yêu Thích</Text>
+                        <React.Fragment>
+                            <View style={styles.titleArea}>
                                 {
-                                    folderIsHorizontal ? (<Entypo name="menu" color="#000" size={24} />)
-                                        :
-                                        (<AntDesign name="appstore-o" color="#000" size={24} />)
+                                    folders && folders.length !== 0 ? (
+                                        <Text style={styles.titleText}>Thư Mục</Text>
+                                    ) : (<View></View>)
                                 }
-                            </TouchableOpacity>
-                        </View>
+                                <TouchableOpacity onPress={() => {
+                                    setFolderHorizontal(!folderIsHorizontal)
+                                }}>
+                                    {
+                                        folderIsHorizontal ? (
+                                            <React.Fragment>
+                                                {
+                                                    folders && folders.length !== 0 && (
+                                                        <Entypo name="menu" color="#000" size={24} />
+                                                    )
+                                                }
+                                            </React.Fragment>
+                                        ) : (
+                                                <React.Fragment>
+                                                    {
+                                                        folders && folders.length !== 0 && (
+                                                            <AntDesign name="appstore-o" color="#000" size={24} />
+                                                        )
+                                                    }
+                                                </React.Fragment>
+                                            )
+                                    }
+                                </TouchableOpacity>
+                            </View>
+                            {
+                                folderIsHorizontal ? (
+                                    <FolderHorizontal folders={folders} navigation={navigation} />
+                                ) : (
+                                        <React.Fragment>
+                                            {
+                                                folders.map(folder => (
+                                                    <FolderVertical navigation={navigation} key={folder.id} folder={folder} />
+                                                ))
+                                            }
+                                        </React.Fragment>
+                                    )
+                            }
+                            <View style={styles.titleArea}>
+                                {
+                                    files && files.length !== 0 && (
+                                        <Text style={styles.titleText}>Tệp Tin</Text>
+                                    )
+                                }
+                                {
+                                    files && files.length !== 0 && (!folders || !folders.length) && (
+                                        <TouchableOpacity onPress={() => {
+                                            setFolderHorizontal(!folderIsHorizontal)
+                                        }}>
+                                            {
+                                                folderIsHorizontal ? (
+                                                    <React.Fragment>
+                                                        {
+                                                            files && files.length !== 0 && (
+                                                                <Entypo name="menu" color="#000" size={24} />
+                                                            )
+                                                        }
+                                                    </React.Fragment>
+                                                ) : (
+                                                        <React.Fragment>
+                                                            {
+                                                                files && files.length !== 0 && (
+                                                                    <AntDesign name="appstore-o" color="#000" size={24} />
+                                                                )
+                                                            }
+                                                        </React.Fragment>
+                                                    )
+                                            }
+                                        </TouchableOpacity>
+                                    )
+                                }
+                            </View>
+                            {
+                                folderIsHorizontal ? (
+                                    <FileHorizontal files={files} navigation={navigation} />
+                                ) : (
+                                        <React.Fragment>
+                                            {
+                                                files.map(file => (
+                                                    <FileVertical navigation={navigation} key={file.id} file={file} />
+                                                ))
+                                            }
+                                        </React.Fragment>
+                                    )
+                            }
+                        </React.Fragment>
                         {
-                            folderIsHorizontal ? (
-                                <FolderHorizontal folders={folders} navigation={navigation} />
-                            ) : (
-                                    <React.Fragment>
-                                        {
-                                            folders.map(folder => (
-                                                <FolderVertical navigation={navigation} key={folder.id} folder={folder} />
-                                            ))
-                                        }
-                                    </React.Fragment>
-                                )
-                        }
-                        {
-                            files && files.length !== 0 && (
-                                <Text style={styles.titleText}>Tệp Tin</Text>
+                            (!folders || !folders.length) && (!files || !files.length) && (
+                                <View style={{
+                                    width: '100%',
+                                    height: '100%',
+                                }}>
+
+                                    <Image
+                                        style={[
+                                            {
+                                                width: 200,
+                                                height: 200,
+                                                // borderRadius: 80,
+                                                marginTop: 20,
+                                                alignSelf: 'center',
+                                            }
+                                        ]}
+                                        source={require('../assets/document.png')}
+                                    />
+                                    <Text style={{
+                                        fontSize: 22,
+                                        textAlign: 'center',
+                                        marginTop: 16,
+                                        color: '#ccc',
+                                        // fontStyle: 'italic'
+                                    }}>
+                                        Tài Liệu Trống
+                            </Text>
+                                </View>
                             )
-                        }
-                        {
-                            folderIsHorizontal ? (
-                                <FileHorizontal files={files} navigation={navigation} />
-                            ) : (
-                                    <React.Fragment>
-                                        {
-                                            files.map(file => (
-                                                <FileVertical navigation={navigation} key={file.id} file={file} />
-                                            ))
-                                        }
-                                    </React.Fragment>
-                                )
                         }
                     </View>
                 </ScrollView>
@@ -108,7 +202,7 @@ export default DocumentLike = ({ navigation }) => {
 const styles = StyleSheet.create({
     scrollViewWrapper: {
         flex: 1,
-        margin: 20,
+        marginHorizontal: 20,
         padding: 4
     },
     titleArea: {
@@ -119,6 +213,6 @@ const styles = StyleSheet.create({
     },
     titleText: {
         fontSize: 18,
-        fontWeight: "bold"
+        fontWeight: "300"
     }
 })

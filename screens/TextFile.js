@@ -9,6 +9,7 @@ import { TextInput } from 'react-native-gesture-handler';
 import ModalAddFileInfo from '../components/modal/ModalAddFileInfo'
 import { useSelector, useDispatch } from "react-redux"
 import { openModalAddFileInfo } from '../store/action/system'
+import { showMessage, hideMessage } from "react-native-flash-message";
 import { handleCreateTextFile, handleChooseFile, handleUpdateTextFile } from '../store/action/file'
 
 export default function TextFile({ navigation, route }) {
@@ -16,6 +17,7 @@ export default function TextFile({ navigation, route }) {
     const [description, setDescription] = useState('')
     const [content, setContent] = useState('')
     const [isNew, setIsNew] = useState(true)
+    const [loading, setLoading] = useState(false)
     const currentFile = useSelector(state => state.file.currentFile)
     const [displayAsterisk, setDisplayAsterisk] = useState(false)
     const dispatch = useDispatch()
@@ -24,19 +26,37 @@ export default function TextFile({ navigation, route }) {
         if (!name) return
         if (isNew) {
             dispatch(handleCreateTextFile(name, description, content)).then((result) => {
+                showMessage({
+                    message: "Tạo Tệp Tin Thành Công",
+                    type: "info",
+                });
                 navigation.pop()
             })
         } else {
             dispatch(handleUpdateTextFile(name, description, content)).then((result) => {
+                showMessage({
+                    message: "Cập Nhật Tệp Tin Thành Công",
+                    type: "info",
+                });
                 navigation.pop()
             })
         }
     }
 
     useEffect(() => {
+        if (loading) {
+            global.props.showLoading()
+        } else {
+            global.props.hideLoading()
+        }
+    }, [loading]);
+
+    useEffect(() => {
         const unsubscribe = navigation.addListener('focus', async () => {
             if (route.params?.fileId) {
+                setLoading(true)
                 await dispatch(handleChooseFile(route.params.fileId))
+                setLoading(false)
                 setIsNew(false)
             }
         });

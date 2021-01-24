@@ -8,6 +8,8 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import { FlatList, ScrollView, TextInput } from 'react-native-gesture-handler';
 import { useSelector, useDispatch } from "react-redux"
 import { handleCreateImageFile, handleChooseFile, handleUpdateImageFile } from '../store/action/file'
+import { domain } from '../service/BaseService'
+import { showMessage, hideMessage } from "react-native-flash-message";
 // import * as ImagePicker from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 let options = {
@@ -26,31 +28,60 @@ export default function ImageFile({ navigation, route }) {
     const [description, setDescription] = useState()
     const [images, setImages] = useState([])
     const [isNew, setIsNew] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [displayAsterisk, setDisplayAsterisk] = useState(false)
     const dispatch = useDispatch()
     const currentFile = useSelector(state => state.file.currentFile)
+    const accessToken = useSelector(state => state.auth.accessToken)
+
     const onHandleSaveFile = () => {
         if (!name) return
         if (isNew) {
+            global.props.showLoading()
             dispatch(handleCreateImageFile(name, description, images)).then((result) => {
+                global.props.hideLoading()
+                showMessage({
+                    message: "Tạo Tệp Tin Thành Công",
+                    type: "info",
+                });
                 navigation.pop()
-            })
+            }).catch((err) => {
+                global.props.hideLoading()
+            });
         } else {
             dispatch(handleUpdateImageFile(name, description, images)).then((result) => {
+                global.props.hideLoading()
+                showMessage({
+                    message: "Cập Nhật Tệp Tin Thành Công",
+                    type: "info",
+                });
                 navigation.pop()
-            })
+            }).catch((err) => {
+                global.props.hideLoading()
+            });
         }
     }
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', async () => {
             if (route.params?.fileId) {
+                const { fileId, shareId } = route.params
+                setLoading(true)
                 await dispatch(handleChooseFile(route.params.fileId))
+                setLoading(false)
                 setIsNew(false)
             }
         });
         return unsubscribe;
     }, [navigation]);
+
+    useEffect(() => {
+        if (loading) {
+            global.props.showLoading()
+        } else {
+            global.props.hideLoading()
+        }
+    }, [loading]);
 
     useEffect(() => {
         if (!isNew) {
@@ -169,15 +200,17 @@ export default function ImageFile({ navigation, route }) {
                         showsVerticalScrollIndicator={false}
                         showsHorizontalScrollIndicator={false}
                         renderItem={({ item, index }) => {
+                            console.log(item, 'item')
                             let source
                             if (item.id) {
                                 source = {
-                                    uri: `http://192.168.1.11:3000/attach-file/${item.id}`,
-                                    headers: { Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZUlkIjoiNWY4ODI1ZGNiYmY5MTEzZTA4MDU1Nzg3IiwiZGV2aWNlSWQiOiIyY2FmZWYzZC1lZGJhLTQ3Y2ItYWNhZC1lNWRkYzE4OTliYjkiLCJpYXQiOjE2MDgwMTc4NzYsImV4cCI6MTYxMDYwOTg3Nn0.irLi3pRRO4PlpXMosOYqnLTJTZivxN2KFXFyeQX1L8o" }
+                                    uri: `${domain}attach-file/${item.id}`,
+                                    headers: { Authorization: `Bearer ${accessToken}` }
                                 }
                             } else {
                                 source = { uri: item.path }
                             }
+                            console.log(source, 'source')
                             return (
                                 <View style={{
                                     width: '45%',

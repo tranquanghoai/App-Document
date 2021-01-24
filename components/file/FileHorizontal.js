@@ -1,11 +1,13 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, FlatList, ImageBackground } from 'react-native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import { useSelector, useDispatch } from "react-redux";
 import { chooseHandleFile } from '../../store/action/file'
 import { openModalFileAction } from '../../store/action/system'
+import { domain } from '../../service/BaseService'
 
 export default function fileHorizontal({ files, navigation }) {
     const dispatch = useDispatch()
@@ -23,6 +25,10 @@ export default function fileHorizontal({ files, navigation }) {
             })
         } else if (file.type === 'image') {
             navigation.push('ImageFile', {
+                fileId: file.id
+            })
+        } else if (file.type === 'form') {
+            navigation.push('FillForm', {
                 fileId: file.id
             })
         }
@@ -58,31 +64,22 @@ export default function fileHorizontal({ files, navigation }) {
                                         <ImageBackground
                                             style={{
                                                 flex: 1,
-                                                width: '100%',
+                                                width: '90%',
+                                                marginLeft: 8,
                                                 justifyContent: "center",
                                                 alignItems: "center",
                                                 borderRadius: 5,
                                                 overflow: "hidden"
                                             }}
                                             source={{
-                                                uri: `http://192.168.1.11:3000/attach-file/${item.attachFileIds[0].id}`,
+                                                uri: `${domain}attach-file/${item.attachFileIds[0].id}`,
                                                 headers: { Authorization: `Bearer ${accessToken}` }
                                             }}>
                                             {/* <Entypo name="image" color="#ccc" size={50} /> */}
                                         </ImageBackground>
                                     )
                                 }
-                                {item.type === 'image' && !item.attachFileIds.length && (
-                                    <View style={{
-                                        padding: 8,
-                                        borderWidth: 1,
-                                        borderColor: '#ccc',
-                                        borderRadius: 5
-                                    }}>
-                                        <Entypo name="text" color="#ccc" size={50} />
-                                    </View>
 
-                                )}
                                 {item.type === 'text' && (
                                     <View style={{
                                         padding: 8,
@@ -94,6 +91,20 @@ export default function fileHorizontal({ files, navigation }) {
                                     </View>
 
                                 )}
+
+                                {
+                                    item.type === 'form' && (
+                                        <View style={{
+                                            padding: 8,
+                                            borderWidth: 1,
+                                            borderColor: '#ccc',
+                                            borderRadius: 5
+                                        }}>
+                                            <AntDesign name="profile" color="#ccc" size={50} />
+                                        </View>
+
+                                    )
+                                }
 
                             </View>
                             <View style={{

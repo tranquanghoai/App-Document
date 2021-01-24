@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text } from 'react-native'
 import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer'
 import Animated from 'react-native-reanimated'
@@ -6,8 +6,25 @@ import AntDesign from 'react-native-vector-icons/AntDesign'
 import Fontisto from 'react-native-vector-icons/Fontisto'
 import Entypo from 'react-native-vector-icons/Entypo'
 import { Body, Button, Container, Content, Footer, H3, Header, Icon, Left, ListItem, Right, Thumbnail } from 'native-base'
+import FactoryService from '../service/FactoryService'
+import { domain } from '../service/BaseService'
 
 export default function DrawerNavigation({ progress, ...props }) {
+
+    const [organization, setOrganization] = useState(null)
+    const [department, setDepartment] = useState(null)
+
+    const getOrganization = async () => {
+        const response = await FactoryService.request('OrganizationService').getMyOrganization()
+        setOrganization(response.data)
+        const responseDep = await FactoryService.request('DepartmentService').getMyDepartment()
+        setDepartment(responseDep.data)
+    }
+
+    useEffect(() => {
+        getOrganization()
+    }, [])
+
     const translateX = Animated.interpolate(progress, {
         inputRange: [0, 1],
         outputRange: [-100, 0]
@@ -17,18 +34,56 @@ export default function DrawerNavigation({ progress, ...props }) {
             <View style={{
                 marginLeft: 4
             }}>
-                <Thumbnail large source={{
-                    uri: "https://upload.wikimedia.org/wikipedia/vi/thumb/c/cd/Logo-hcmut.svg/1004px-Logo-hcmut.svg.png"
-                }}
-                    style={{ marginBottom: 14 }}
-                />
+                {
+                    organization?.logo ? (
+                        <Thumbnail large source={{
+                            uri: `${domain}${logo}`
+                        }}
+                            style={{ marginBottom: 14 }}
+                        />
+                    ) : (
+                            <View style={{
+                                width: 100,
+                                height: 100,
+                                borderColor: '#f57811',
+                                borderWidth: 1,
+                                borderRadius: 50,
+                                marginBottom: 8,
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }}>
+
+                                <Text style={{
+                                    fontSize: 30
+                                }}>{organization?.name ? organization.name[0] : '?'}</Text>
+                            </View>
+                        )
+                }
+
                 <Text style={{
                     fontSize: 18,
                     fontWeight: "bold",
                     marginBottom: 14,
                     color: '#000'
                 }}>
-                    Công ty TNHH Bách Khoa TP.HCM
+                    {organization?.name ? organization.name : '?'}
+                </Text>
+
+                <Text style={{
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    marginBottom: 14,
+                    color: '#000'
+                }}>
+                    {department?.name ? `Phòng ban ${department.name}` : ''}
+                </Text>
+
+                <Text style={{
+                    fontSize: 18,
+                    marginBottom: 14,
+                    color: '#000'
+                }}>
+                    {organization?.address ? `Địa Chỉ ${organization.address}` : ''}
                 </Text>
             </View>
 

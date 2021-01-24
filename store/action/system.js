@@ -95,3 +95,67 @@ export const closeModalFileSubmit = () => {
         })
     }
 }
+
+export const openModalSelectForm = () => {
+    return (dispatch) => {
+        dispatch({
+            type: types.OPEN_MODAL_SELECT_FORM
+        })
+    }
+}
+
+export const closeModalSelectForm = () => {
+    return (dispatch) => {
+        dispatch({
+            type: types.CLOSE_MODAL_SELECT_FORM
+        })
+    }
+}
+
+export const openModalShareAction = () => {
+    return (dispatch) => {
+        dispatch({
+            type: types.OPEN_MODAL_SHARE_ACTION
+        })
+    }
+}
+
+export const closeModalShareAction = () => {
+    return (dispatch) => {
+        dispatch({
+            type: types.CLOSE_MODAL_SHARE_ACTION
+        })
+    }
+}
+
+export const isFromHome = () => {
+    return (dispatch) => {
+        dispatch({
+            type: types.IS_FROM_HOME
+        })
+    }
+}
+
+export const isNotFromHome = () => {
+    return (dispatch) => {
+        dispatch({
+            type: types.IS_NOT_FROM_HOME
+        })
+    }
+}
+
+export const openModalSortDoc = () => {
+    return (dispatch) => {
+        dispatch({
+            type: types.OPEN_MODAL_SORT
+        })
+    }
+}
+
+export const closeModalSortDoc = () => {
+    return (dispatch) => {
+        dispatch({
+            type: types.CLOSE_MODAL_SORT
+        })
+    }
+}

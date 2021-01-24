@@ -5,7 +5,7 @@ import { closeModalCreateFolder } from '../../store/action/system'
 import { handleCreateFolder, handleUpdateFolder } from '../../store/action/folder'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { TextInput } from 'react-native-gesture-handler'
-
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 export default ModalCreateFolder = () => {
     const isOpenModalCreateFolder = useSelector(state => state.system.isOpenModalCreateFolder)
@@ -30,21 +30,28 @@ export default ModalCreateFolder = () => {
     }, [isOpenModalCreateFolder]);
 
     const updateFolder = () => {
-        dispatch(handleUpdateFolder(folder.id, { name, description }))
-            .then((result) => {
-                resetText()
-                dispatch(closeModalCreateFolder())
-            })
+        dispatch(handleUpdateFolder(folder.id, { name, description })).then((result) => {
+            showMessage({
+                message: "Cập Nhật Thư Mục Thành Công",
+                type: "info",
+            });
+            resetText()
+            dispatch(closeModalCreateFolder())
+        })
     }
 
     const resetText = () => {
         setName('')
         setDescription('')
     }
-    const createFolder = () => {
+    const createFolder = async () => {
         if (!name) return setAsterisk(true)
         try {
-            dispatch(handleCreateFolder(name, description))
+            await dispatch(handleCreateFolder(name, description))
+            showMessage({
+                message: "Tạo Thư Mục Thành Công",
+                type: "info",
+            });
             resetText()
             dispatch(closeModalCreateFolder())
         } catch (error) {

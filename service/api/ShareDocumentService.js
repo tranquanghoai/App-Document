@@ -22,6 +22,14 @@ export default class ShareDocumentService extends BaseService {
 		return res.data
 	}
 
+	ownerDeleteShare(shareId) {
+		return this.delete(this.slug + `/stop-share/${shareId}`)
+	}
+
+	updateShareFile(shareId, params = {}) {
+		return this.put(this.slug + `/update-share/${shareId}`, params)
+	}
+
 	async createImageFile(data = []) {
 		const res = await this.fetchBlob({
 			method: 'POST',

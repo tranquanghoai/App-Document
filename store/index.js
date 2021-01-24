@@ -7,6 +7,8 @@ import file from './reducer/file'
 import auth from './reducer/auth'
 import submit from './reducer/submit'
 import share from './reducer/share'
+import transition from './reducer/transition'
+import overview from './reducer/overview'
 
 const rootReducer = combineReducers({
     system,
@@ -14,7 +16,9 @@ const rootReducer = combineReducers({
     file,
     auth,
     submit,
-    share
+    share,
+    transition,
+    overview
 })
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(

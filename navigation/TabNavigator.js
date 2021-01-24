@@ -14,7 +14,6 @@ import { createDrawerNavigator } from '@react-navigation/drawer'
 import Home from '../screens/Home'
 import Login from '../screens/Login'
 import Like from '../screens/Like'
-import Shared from '../screens/Shared'
 import Document from '../screens/Document'
 import DocumentLike from '../screens/DocumentLike'
 import DocumentList from '../screens/DocumentList'
@@ -25,7 +24,10 @@ import ModalAddDocument from '../components/modal/ModalAddDocument'
 import ModalCreateFolder from '../components/modal/ModalCreateFolder'
 import ModalFolderAction from '../components/modal/ModalFolderAction'
 import ModalFileAction from '../components/modal/ModalFileAction'
+import ModalSelectForm from '../components/modal/ModalSelectForm'
 import ModalFileSubmitAction from '../components/modal/ModalFileSubmitAction'
+import ModalShareAction from '../components/modal/ModalShareAction'
+import ModalSortBy from '../components/modal/ModalSortBy'
 
 const Stack = createStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -86,7 +88,7 @@ const TabNavigator = ({ navigation }) => {
                             icon = focused
                                 ? <FontAwesome name="file" size={size} color={color} />
                                 : <FontAwesome name="file-o" size={size} color={color} />
-                        } else if (route.name === 'Đã Nộp') {
+                        } else if (route.name === 'Đã Trình Duyệt') {
                             icon = focused
                                 ? <FontAwesome name="send" size={size} color={color} />
                                 : <FontAwesome name="send-o" size={size} color={color} />
@@ -111,15 +113,18 @@ const TabNavigator = ({ navigation }) => {
                     style: { height: 55, padding: 4 }
                 }}
             >
-                <Tab.Screen name="Tài liệu" component={DocumentStackTab} />
                 <Tab.Screen name="Trang Chủ" component={HomeStackTab} />
+                <Tab.Screen name="Tài liệu" component={DocumentStackTab} />
                 <Tab.Screen name="Yêu Thích" component={LikeStackTab} />
-                <Tab.Screen name="Đã Nộp" component={SubmitStackTab} />
+                <Tab.Screen name="Đã Trình Duyệt" component={SubmitStackTab} />
             </Tab.Navigator >
             <ButtonAddDocument />
             <ModalCreateFolder />
             <ModalFolderAction />
+            <ModalSortBy />
+            <ModalShareAction navigation={navigation} />
             <ModalFileAction navigation={navigation} />
+            <ModalSelectForm navigation={navigation} />
             <ModalAddDocument navigation={navigation} />
             <ModalFileSubmitAction navigation={navigation} />
         </React.Fragment>

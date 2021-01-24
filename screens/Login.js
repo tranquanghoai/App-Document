@@ -5,18 +5,31 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux'
-import { login } from '../store/action/auth'
+import { login, checkLogin } from '../store/action/auth'
 export default function Login({ navigation }) {
     const [phoneNumber, setPhoneNumber] = useState()
     const [password, setPassword] = useState()
     const [showPassword, setShowPassword] = useState(true)
 
     const dispatch = useDispatch()
-    const onHandleLogin = () => {
-        dispatch(login(phoneNumber, password, 1)).then((result) => {
-            navigation.replace('Home')
-        }).catch((err) => {
-        });
+    const onHandleLogin = async () => {
+        try {
+            await dispatch(checkLogin(phoneNumber, password))
+            navigation.navigate('OTP', {
+                phoneNumber,
+                password
+            })
+        } catch (error) {
+
+        }
+        // navigation.navigate('OTP', {
+        //     phoneNumber,
+        //     password
+        // })
+        // dispatch(login(phoneNumber, password, 1)).then((result) => {
+        //     navigation.replace('Home')
+        // }).catch((err) => {
+        // });
     }
     return (
         <View style={{
@@ -48,7 +61,7 @@ export default function Login({ navigation }) {
                         fontWeight: "bold",
                         color: '#f57811',
                         marginBottom: 20
-                    }}>Document Manager</Text>
+                    }}>BK Document</Text>
                 </View>
 
 
@@ -82,6 +95,8 @@ export default function Login({ navigation }) {
                         }}
                         placeholderTextColor='#a19595'
                         placeholder='Số điện thoại'
+                        autoFocus={true}
+                        keyboardType={'number-pad'}
                         onChangeText={(phoneNumber) => setPhoneNumber(phoneNumber)}
                     />
                 </View>

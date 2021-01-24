@@ -12,24 +12,39 @@ import { getListSubmitFile } from '../store/action/submit'
 import { getListFile } from '../store/action/file'
 import FileHorizontalSubmit from '../components/file/FileHorizontalSubmit';
 import FileVerticalSubmit from '../components/file/FileVerticalSubmit';
+import { Image } from 'react-native';
 
 export default DocumentLike = ({ navigation }) => {
     const [folderIsHorizontal, setFolderHorizontal] = useState(false)
     const dispatch = useDispatch()
     const listSubmitFile = useSelector(state => state.submit.listSubmitFile)
+    const [loading, setLoading] = useState(false)
 
-    const fetchData = () => {
+    const fetchData = async () => {
         try {
             const filterFile = {}
-            dispatch(getListSubmitFile(filterFile))
+            setLoading(true)
+            await dispatch(getListSubmitFile(filterFile))
+            setLoading(false)
         } catch (error) {
             console.log(error, 'error')
         }
     }
-    useEffect(() => {
-        fetchData()
-    }, [])
 
+    useEffect(() => {
+        if (loading) {
+            global.props.showLoading()
+        } else {
+            global.props.hideLoading()
+        }
+    }, [loading]);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            fetchData()
+        });
+        return unsubscribe;
+    }, [navigation])
     return (
         <View style={{
             flex: 1
@@ -39,21 +54,28 @@ export default DocumentLike = ({ navigation }) => {
                 <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
                     <View style={styles.scrollViewWrapper}>
                         <View style={styles.titleArea}>
-                            {
-                                listSubmitFile && listSubmitFile.length !== 0 ? (
-                                    <Text style={styles.titleText}>Tệp Tin Đã Nộp</Text>
-                                ) : (
-                                        <View></View>
-                                    )
-                            }
-
+                            <Text style={styles.titleText}>Tệp Tin Đã Trình Duyệt</Text>
                             <TouchableOpacity onPress={() => {
                                 setFolderHorizontal(!folderIsHorizontal)
                             }}>
                                 {
-                                    folderIsHorizontal ? (<Entypo name="menu" color="#000" size={24} />)
-                                        :
-                                        (<AntDesign name="appstore-o" color="#000" size={24} />)
+                                    folderIsHorizontal ? (
+                                        <React.Fragment>
+                                            {
+                                                listSubmitFile && listSubmitFile.length !== 0 && (
+                                                    <Entypo name="menu" color="#000" size={24} />
+                                                )
+                                            }
+                                        </React.Fragment>
+                                    ) : (
+                                            <React.Fragment>
+                                                {
+                                                    listSubmitFile && listSubmitFile.length !== 0 && (
+                                                        <AntDesign name="appstore-o" color="#000" size={24} />
+                                                    )
+                                                }
+                                            </React.Fragment>
+                                        )
                                 }
                             </TouchableOpacity>
                         </View>
@@ -70,6 +92,38 @@ export default DocumentLike = ({ navigation }) => {
                                         }
                                     </React.Fragment>
                                 )
+                        }
+
+                        {
+                            (!listSubmitFile || !listSubmitFile.length) && (
+                                <View style={{
+                                    width: '100%',
+                                    height: '100%',
+                                }}>
+
+                                    <Image
+                                        style={[
+                                            {
+                                                width: 200,
+                                                height: 200,
+                                                // borderRadius: 80,
+                                                marginTop: 20,
+                                                alignSelf: 'center',
+                                            }
+                                        ]}
+                                        source={require('../assets/document.png')}
+                                    />
+                                    <Text style={{
+                                        fontSize: 22,
+                                        textAlign: 'center',
+                                        marginTop: 16,
+                                        color: '#ccc',
+                                        // fontStyle: 'italic'
+                                    }}>
+                                        Tài Liệu Trống
+                            </Text>
+                                </View>
+                            )
                         }
                     </View>
                 </ScrollView>

@@ -8,11 +8,11 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import FactoryService from '../../service/FactoryService'
 import { useSelector, useDispatch } from "react-redux";
 import { getListFolder, chooseParentFolder, directChooseParentFolder } from '../../store/action/folder'
-import { openModalFolderAction } from '../../store/action/system'
+import { openModalFolderAction, isFromHome, isNotFromHome } from '../../store/action/system'
 import { selectHandleFolder } from '../../store/action/folder'
 
 import moment from 'moment';
-export default function FolderVertical({ navigation, folder }) {
+export default function FolderVertical({ navigation, folder, type }) {
     const formatDate = (date) => {
         return moment(date).format("DD-MM-YYYY")
     }
@@ -26,6 +26,11 @@ export default function FolderVertical({ navigation, folder }) {
     const handelOpenModalFolderAction = () => {
         dispatch(selectHandleFolder(folder))
         dispatch(openModalFolderAction())
+        if (type === 'home') {
+            dispatch(isFromHome())
+        } else {
+            dispatch(isNotFromHome())
+        }
     }
     return (
         <TouchableOpacity
@@ -118,10 +123,11 @@ export default function FolderVertical({ navigation, folder }) {
                     </View>
                 </View>
                 <TouchableOpacity style={{
-                    width: '5%',
+                    width: '8%',
                     justifyContent: "center",
                     alignItems: "flex-end",
-                    padding: 4,
+                    paddingVertical: 8,
+                    // backgroundColor: 'red'
                 }}
                     onPress={() => handelOpenModalFolderAction()}
                 >

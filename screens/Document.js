@@ -1,28 +1,33 @@
-import { Container } from 'native-base';
+import { Container, Item, Picker } from 'native-base';
 import React, { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
 import { useSelector, useDispatch } from "react-redux"
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import Entypo from 'react-native-vector-icons/Entypo'
+import Feather from 'react-native-vector-icons/Feather'
 
 import FolderHorizontal from '../components/folder/FolderHorizontal'
 import FolderVertical from '../components/folder/FolderVertical'
 import HomeHeader from '../components/header/HomeHeader'
 import { getListFolder, chooseParentFolder } from '../store/action/folder'
+import { openModalSortDoc } from '../store/action/system'
 import { getListFile } from '../store/action/file'
 import FileHorizontal from '../components/file/FileHorizontal';
 import FileVertical from '../components/file/FileVertical';
 import DocumentShared from '../components/DocumentShared';
 import { ActivityIndicator } from 'react-native';
+import { Image } from 'react-native';
 
 export default Document = ({ navigation }) => {
     const [folderIsHorizontal, setFolderHorizontal] = useState(false)
+    const [selected, setSelected] = useState('key1')
     const [loadingFolder, setLoadingFolder] = useState(true)
     const [loadingFile, setLoadingFile] = useState(true)
     const dispatch = useDispatch()
     const folders = useSelector(state => state.folder.folders)
     const files = useSelector(state => state.file.files)
     const parentFolder = useSelector(state => state.folder.parentFolder)
+    const { sortBy, sortValue } = useSelector(state => state.overview)
 
     const [isDocument, setIsDocument] = useState(true)
     const fetchData = () => {
@@ -53,11 +58,23 @@ export default Document = ({ navigation }) => {
     }, [navigation])
 
     useEffect(() => {
+        if (loadingFolder || loadingFile) {
+            global.props.showLoading()
+        } else {
+            global.props.hideLoading()
+        }
+    }, [loadingFolder, loadingFile])
+
+    useEffect(() => {
         if (!parentFolder) {
             fetchData()
         }
     }, [parentFolder])
-    console.log(loadingFolder, 'loading folder')
+
+    const onValueChange = (value) => {
+        setSelected(value)
+    }
+
     return (
         <View style={{
             flex: 1
@@ -104,73 +121,178 @@ export default Document = ({ navigation }) => {
                     </View>
                     {
                         isDocument ? (
-                            <View style={styles.scrollViewWrapper}>
+                            <View style={[styles.scrollViewWrapper, { paddingBottom: 50 }]}>
+
+                                <View style={styles.titleArea}>
+                                    {
+                                        folders && folders.length !== 0 ? (
+                                            <Text style={[styles.titleText, { flex: 1 }]}>Thư Mục</Text>
+                                        ) : (<View></View>)
+                                    }
+                                    <View style={{
+                                        marginRight: 12,
+                                    }}>
+                                        <TouchableOpacity style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}
+                                            onPress={() => dispatch(openModalSortDoc())}  >
+                                            {
+                                                sortValue == 1 ? (
+                                                    <AntDesign name="arrowup" color="#f57811" size={18} style={{
+                                                        padding: 4
+                                                    }} />
+                                                ) : (
+                                                        <AntDesign name="arrowdown" color="#f57811" size={18} style={{
+                                                            padding: 4
+                                                        }} />
+                                                    )
+                                            }
+
+                                            <Text style={{
+                                                marginLeft: 4
+                                            }}>{sortBy == 0 ? 'Tên tài liệu' : (sortBy == 1 ? 'Ngày tạo' : 'Ngày cập nhập')}</Text>
+                                        </TouchableOpacity>
+
+                                    </View>
+                                    <TouchableOpacity
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}
+                                        onPress={() => {
+                                            setFolderHorizontal(!folderIsHorizontal)
+                                        }}>
+                                        {
+                                            folderIsHorizontal ? (
+                                                <React.Fragment>
+                                                    {
+                                                        folders && folders.length !== 0 && (
+                                                            <Entypo name="menu" color="#000" size={24} />
+                                                        )
+                                                    }
+                                                </React.Fragment>
+                                            ) : (
+                                                    <React.Fragment>
+                                                        {
+                                                            folders && folders.length !== 0 && (
+                                                                <AntDesign name="appstore-o" color="#000" size={24} />
+                                                            )
+                                                        }
+                                                    </React.Fragment>
+                                                )
+                                        }
+                                    </TouchableOpacity>
+                                </View>
                                 {
-                                    loadingFolder ? (
-                                        <ActivityIndicator size="small" color="#f57811" />
+                                    folderIsHorizontal ? (
+                                        <FolderHorizontal folders={folders} navigation={navigation} />
                                     ) : (
                                             <React.Fragment>
-                                                <View style={styles.titleArea}>
-                                                    {
-                                                        folders && folders.length !== 0 ? (
-                                                            <Text style={styles.titleText}>Thư Mục</Text>
-                                                        ) : (<View></View>)
-                                                    }
-                                                    <TouchableOpacity onPress={() => {
-                                                        setFolderHorizontal(!folderIsHorizontal)
-                                                    }}>
-                                                        {
-                                                            folderIsHorizontal ? (<Entypo name="menu" color="#000" size={24} />)
-                                                                :
-                                                                (<AntDesign name="appstore-o" color="#000" size={24} />)
-                                                        }
-                                                    </TouchableOpacity>
-                                                </View>
                                                 {
-                                                    folderIsHorizontal ? (
-                                                        <FolderHorizontal folders={folders} navigation={navigation} />
-                                                    ) : (
-                                                            <React.Fragment>
-                                                                {
-                                                                    folders.map(folder => (
-                                                                        <FolderVertical navigation={navigation} key={folder.id} folder={folder} />
-                                                                    ))
-                                                                }
-                                                            </React.Fragment>
-                                                        )
-                                                }
-
-                                                {
-                                                    files && files.length !== 0 && (
-                                                        <Text style={styles.titleText}>Tệp Tin</Text>
-                                                    )
-                                                }
-                                                {
-                                                    !loadingFolder && (
-                                                        <React.Fragment>
-                                                            {
-                                                                folderIsHorizontal ? (
-                                                                    <FileHorizontal files={files} navigation={navigation} />
-                                                                ) : (
-                                                                        <React.Fragment>
-                                                                            {
-                                                                                files.map(file => (
-                                                                                    <FileVertical navigation={navigation} key={file.id} file={file} />
-                                                                                ))
-                                                                            }
-                                                                        </React.Fragment>
-                                                                    )
-                                                            }
-                                                        </React.Fragment>
-                                                    )
+                                                    folders.map(folder => (
+                                                        <FolderVertical navigation={navigation} key={folder.id} folder={folder} />
+                                                    ))
                                                 }
                                             </React.Fragment>
                                         )
                                 }
+                                <View style={styles.titleArea}>
+                                    {
+                                        files && files.length !== 0 && (
+                                            <Text style={styles.titleText}>Tệp Tin</Text>
+                                        )
+                                    }
+                                    {
+                                        !folders || folders.length == 0 && (
+                                            <TouchableOpacity onPress={() => {
+                                                setFolderHorizontal(!folderIsHorizontal)
+                                            }}>
+                                                {
+                                                    folderIsHorizontal ? (
+                                                        <React.Fragment>
+                                                            {
+                                                                files && files.length !== 0 && (
+                                                                    <Entypo name="menu" color="#000" size={24} />
+                                                                )
+                                                            }
+                                                        </React.Fragment>
+                                                    ) : (
+                                                            <React.Fragment>
+                                                                {
+                                                                    files && files.length !== 0 && (
+                                                                        <AntDesign name="appstore-o" color="#000" size={24} />
+                                                                    )
+                                                                }
+                                                            </React.Fragment>
+                                                        )
+                                                }
+                                            </TouchableOpacity>
+                                        )
+                                    }
+
+                                </View>
+                                {
+                                    !loadingFolder && (
+                                        <React.Fragment>
+                                            {
+                                                folderIsHorizontal ? (
+                                                    <View style={{
+                                                        marginTop: 8
+                                                    }}>
+                                                        <FileHorizontal files={files} navigation={navigation} />
+                                                    </View>
+                                                ) : (
+                                                        <React.Fragment>
+                                                            {
+                                                                files.map(file => (
+                                                                    <FileVertical navigation={navigation} key={file.id} file={file} />
+                                                                ))
+                                                            }
+                                                        </React.Fragment>
+                                                    )
+                                            }
+                                        </React.Fragment>
+                                    )
+                                }
+
+                                {
+                                    (!folders || !folders.length) && (!files || !files.length) && (
+                                        <View style={{
+                                            width: '100%',
+                                            height: '100%',
+                                        }}>
+
+                                            <Image
+                                                style={[
+                                                    {
+                                                        width: 200,
+                                                        height: 200,
+                                                        // borderRadius: 80,
+                                                        marginTop: 20,
+                                                        alignSelf: 'center',
+                                                    }
+                                                ]}
+                                                source={require('../assets/document.png')}
+                                            />
+                                            <Text style={{
+                                                fontSize: 22,
+                                                textAlign: 'center',
+                                                marginTop: 16,
+                                                color: '#ccc',
+                                                // fontStyle: 'italic'
+                                            }}>
+                                                Tài Liệu Trống
+                            </Text>
+                                        </View>
+                                    )
+                                }
 
                             </View>
                         ) : (
-                                <DocumentShared />
+                                <DocumentShared navigation={navigation} />
                             )
                     }
 
@@ -194,7 +316,7 @@ const styles = StyleSheet.create({
     },
     titleText: {
         fontSize: 18,
-        fontWeight: "bold"
+        fontWeight: "300"
     },
     tabDocumentStyle: {
         flex: 1,

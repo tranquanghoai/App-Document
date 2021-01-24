@@ -2,31 +2,31 @@ import React from 'react'
 import { View, Text, TouchableOpacity, FlatList, ImageBackground } from 'react-native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Entypo from 'react-native-vector-icons/Entypo';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import { useSelector, useDispatch } from "react-redux";
 import { chooseHandleFile } from '../../store/action/file'
 import { openModalFileAction } from '../../store/action/system'
+import { domain } from './../../service/BaseService'
+import { selectHandleSubmitFile } from '../../store/action/submit'
+import { openModalFileSubmit } from '../../store/action/system'
 
 export default function fileHorizontalSubmit({ listSubmitFile, navigation }) {
     const dispatch = useDispatch()
     const accessToken = useSelector(state => state.auth.accessToken)
 
     const handleOpenHandleFileAction = (file) => {
-        dispatch(chooseHandleFile(file))
-        dispatch(openModalFileAction())
+        dispatch(selectHandleSubmitFile(file))
+        dispatch(openModalFileSubmit())
     }
 
     const onHandlePress = (file) => {
-        if (file.type === 'text') {
-            navigation.push('TextFile', {
-                fileId: file.id
-            })
-        } else if (file.type === 'image') {
-            navigation.push('ImageFile', {
-                fileId: file.id
-            })
-        }
+        navigation.push('Approvement', {
+            fileId: file.id
+        })
     }
+
+
     return (
         <FlatList
             data={listSubmitFile}
@@ -55,35 +55,25 @@ export default function fileHorizontalSubmit({ listSubmitFile, navigation }) {
                                 alignItems: "center"
                             }}>
                                 {
-                                    item.type === 'image' && item.fileId.attachFileIds.length && (
+                                    item.fileId.type === 'image' && item.fileId.attachFileIds.length && (
                                         <ImageBackground
                                             style={{
                                                 flex: 1,
-                                                width: '100%',
+                                                width: '90%',
+                                                marginLeft: 8,
                                                 justifyContent: "center",
                                                 alignItems: "center",
                                                 borderRadius: 5,
                                                 overflow: "hidden"
                                             }}
                                             source={{
-                                                uri: `http://192.168.1.11:3000/attach-file/${item.fileId.attachFileIds[0].id}`,
+                                                uri: `${domain}attach-file/${item.fileId.attachFileIds[0].id}`,
                                                 headers: { Authorization: `Bearer ${accessToken}` }
                                             }}>
-                                            {/* <Entypo name="image" color="#ccc" size={50} /> */}
                                         </ImageBackground>
                                     )
                                 }
-                                {item.fileId.type === 'image' && !item.fileId.attachFileIds.length && (
-                                    <View style={{
-                                        padding: 8,
-                                        borderWidth: 1,
-                                        borderColor: '#ccc',
-                                        borderRadius: 5
-                                    }}>
-                                        <Entypo name="text" color="#ccc" size={50} />
-                                    </View>
 
-                                )}
                                 {item.fileId.type === 'text' && (
                                     <View style={{
                                         padding: 8,
@@ -95,6 +85,20 @@ export default function fileHorizontalSubmit({ listSubmitFile, navigation }) {
                                     </View>
 
                                 )}
+
+                                {
+                                    item.fileId.type === 'form' && (
+                                        <View style={{
+                                            padding: 8,
+                                            borderWidth: 1,
+                                            borderColor: '#ccc',
+                                            borderRadius: 5
+                                        }}>
+                                            <AntDesign name="profile" color="#ccc" size={50} />
+                                        </View>
+
+                                    )
+                                }
 
                             </View>
                             <View style={{
@@ -121,7 +125,7 @@ export default function fileHorizontalSubmit({ listSubmitFile, navigation }) {
                                 justifyContent: "center",
                                 alignItems: 'center'
                             }}
-                                onPress={() => handleOpenHandleFileAction(item.fileId)}
+                                onPress={() => handleOpenHandleFileAction(item)}
                             >
                                 <Fontisto name="more-v-a" color="#000" size={18} />
                             </TouchableOpacity>

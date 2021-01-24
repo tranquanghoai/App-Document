@@ -15,7 +15,7 @@ import SelectFolder from '../components/folder/SelectFolder';
 import FileHorizontal from '../components/file/FileHorizontal';
 import FileVertical from '../components/file/FileVertical';
 import { getListFolder, chooseFolderTransfer } from '../store/action/folder'
-import { handleShareFile } from '../store/action/share'
+import { handleShareFile, handleUpdateShareFile } from '../store/action/share'
 import Entypo from 'react-native-vector-icons/Entypo'
 import FactoryService from '../service/FactoryService'
 
@@ -112,36 +112,16 @@ export default ShareFile = ({ navigation, route }) => {
     const [isPersonal, setIsPersonal] = useState(true)
     const dispatch = useDispatch()
     const employee = useSelector(state => state.auth.employee)
-    // const selectFolderTransfer = useSelector(state => state.folder.selectFolderTransfer)
-
-
-    // useEffect(() => {
-    //     const unsubscribe = navigation.addListener('focus', async () => {
-    //         await dispatch(chooseFolderTransfer(route.params.selectFolderTransferId))
-    //     });
-
-    //     return unsubscribe;
-    // }, [navigation]);
-
-    // const saveTransferFolder = () => {
-    //     const message = selectFolderTransfer ? selectFolderTransfer.name : 'Thư mục gốc'
-    //     global.props.showConfirm(
-    //         'Chuyển thư mục',
-    //         `Bạn có muốn chuyển tệp tin đến thư mục ${message}?`,
-    //         () => dispatch(handleTransferFolder())
-    //     )
-    // }
-
+    const [isNew, setIsNew] = useState(true)
     const [keyword, setKeyword] = useState('')
     const [employees, setEmployees] = useState([])
     const [chooseEmployees, setChooseEmployees] = useState([])
+    const handleShare = useSelector(state => state.share.handleShare);
+    const handleFile = useSelector(state => state.file.handleFile);
 
     const getEmployees = async () => {
         try {
-            const filter = {
-                departmentId: employee.departmentId
-            }
-            const response = await FactoryService.request('AuthService').getListEmployee({ filter: filter, search: keyword })
+            const response = await FactoryService.request('AuthService').getListEmployee({ search: keyword })
             const data = response.data
             setEmployees(data.data.filter(e => {
                 const found = chooseEmployees.find(choose => choose.id === e.id)
@@ -156,6 +136,8 @@ export default ShareFile = ({ navigation, route }) => {
     const handleChooseEmployee = (employee) => {
         const newChooseEmployee = [...chooseEmployees, employee]
         setChooseEmployees(newChooseEmployee)
+        let remainEmployees = employees.filter(e => e.id != employee.id)
+        setEmployees([...remainEmployees])
     }
 
     const shareFile = () => {
@@ -164,21 +146,58 @@ export default ShareFile = ({ navigation, route }) => {
         global.props.showConfirm(
             'Chia sẻ tệp tin',
             'Bạn có muốn chia sẽ tệp tin đã chọn?',
-            () => dispatch(handleShareFile(range, shareWith))
+            () => {
+                dispatch(handleShareFile(range, shareWith))
+                navigation.pop()
+            }
         )
     }
 
+    const updateShareFile = () => {
+        const range = isPersonal ? 'people' : 'department'
+        const shareWith = isPersonal ? chooseEmployees.map(e => e.id) : []
+        global.props.showConfirm(
+            'Cập nhật chia sẻ tệp tin',
+            'Bạn có muốn thay đổi chia sẽ tệp tin đã chọn?',
+            () => {
+                dispatch(handleUpdateShareFile(range, shareWith))
+                navigation.pop()
+            }
+        )
+    }
+
+    const onHandleSave = () => {
+        if (isNew) {
+            shareFile()
+        } else {
+            updateShareFile()
+        }
+    }
+
     const deleteChooseEmployee = (employee) => {
-        console.log(employee, 'employee')
-        console.log(chooseEmployees, 'chooseEmployees')
         let newChooseEmployee = [...chooseEmployees]
         const findIndex = newChooseEmployee.findIndex(e => e.id == employee.id)
-        // console.log(findIndex, 'findIndex')
         if (findIndex !== -1) {
             newChooseEmployee.splice(findIndex, 1)
             setChooseEmployees(newChooseEmployee)
         }
     }
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', async () => {
+            if (route.params?.edit) {
+                setIsNew(false)
+                const { range, shareWith } = handleShare
+                if (range == 'people') {
+                    setIsPersonal(true)
+                    setChooseEmployees(shareWith)
+                } else {
+                    setIsPersonal(false)
+                }
+            }
+        });
+        return unsubscribe;
+    }, [navigation]);
 
     useEffect(() => {
         if (keyword) {
@@ -223,7 +242,7 @@ export default ShareFile = ({ navigation, route }) => {
                         }}>Chia sẻ</Title>
                     </Body>
                     <Right>
-                        <TouchableOpacity onPress={shareFile}>
+                        <TouchableOpacity onPress={onHandleSave}>
                             <Button transparent>
                                 <Entypo name="save" color="#f57811" size={25} />
                             </Button>
@@ -243,6 +262,32 @@ export default ShareFile = ({ navigation, route }) => {
                         <TouchableOpacity onPress={() => setIsPersonal(false)}>
                             <ShareType name="Phòng ban" icon="addusergroup" additionnalStyle={additionnalStyleDepart} />
                         </TouchableOpacity>
+                    </View>
+                    <View style={{
+                        marginTop: 12,
+                        marginBottom: 4,
+                        flexDirection: 'row'
+                    }}>
+                        <Text style={{
+                            fontWeight: 'bold',
+                            fontSize: 16
+                        }}>Tệp tin</Text>
+                        {
+                            isNew ? (
+                                <Text style={{
+                                    // fontWeight: 'bold',
+                                    marginLeft: 16,
+                                    fontSize: 16
+                                }}>{handleFile?.name ? handleFile.name : ''}</Text>
+                            ) : (
+                                    <Text style={{
+                                        // fontWeight: 'bold',
+                                        marginLeft: 16,
+                                        fontSize: 16
+                                    }}>{handleShare?.fileId?.name ? handleShare.fileId.name : ''}</Text>
+                                )
+                        }
+
                     </View>
                     {isPersonal ? (
                         <View style={{ marginVertical: 8 }}>

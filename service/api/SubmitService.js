@@ -18,6 +18,10 @@ export default class SubmitService extends BaseService {
 		return res.data
 	}
 
+	async getLatestSubmit() {
+		const res = await this.get(this.slug + `/latest`)
+		return res.data
+	}
 	cancelSubmitFile(id) {
 		return this.delete(this.slug + `/${id}`)
 	}

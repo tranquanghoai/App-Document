@@ -2,6 +2,7 @@ import BaseService from '../BaseService'
 import RNFetchBlob from 'rn-fetch-blob';
 // import * as axios from 'axios'
 import $param from 'jquery-param';
+import file from '../../store/reducer/file';
 
 export default class FileService extends BaseService {
 	constructor(slug) {
@@ -16,7 +17,11 @@ export default class FileService extends BaseService {
 			return this.errorMsg(e)
 		}
 	}
-
+	async getLatestFile(filter = {}) {
+		const res = await this.get(this.slug + `/latest?${$param({ filter })}`)
+		console.log(' xuong day')
+		return res.data
+	}
 	async createTextFile(file = {}) {
 		try {
 			const res = await this.post(this.slug + `/create-text`, file)
@@ -24,6 +29,18 @@ export default class FileService extends BaseService {
 		} catch (error) {
 			return this.errorMsg(e)
 		}
+	}
+	async createForm(file = {}) {
+		try {
+			const res = await this.post(this.slug + `/create-form`, file)
+			return res.data
+		} catch (error) {
+			console.log(error, 'error')
+		}
+	}
+
+	updateForm(fileId, params = {}) {
+		return this.put(this.slug + `/update-file-form/${fileId}`, params)
 	}
 
 	async createImageFile(data = []) {
@@ -41,7 +58,6 @@ export default class FileService extends BaseService {
 	}
 
 	async updateImageFile(data = [], fileId) {
-		console.log({ data, fileId })
 		const res = await this.fetchBlob({
 			method: 'PUT',
 			url: this.slug + `/${fileId}`,

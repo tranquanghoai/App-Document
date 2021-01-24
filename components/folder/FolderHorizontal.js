@@ -23,6 +23,9 @@ export default function FolderHorizontal({ folders, navigation }) {
         <FlatList
             data={folders}
             numColumns={2}
+            style={{
+                marginTop: 12
+            }}
             renderItem={({ item, index }) => {
                 return (
                     <TouchableOpacity style={{
@@ -62,7 +65,9 @@ export default function FolderHorizontal({ folders, navigation }) {
                                 width: '100%',
                                 height: 40,
                                 justifyContent: "center",
-                                alignItems: 'center'
+                                alignItems: 'center',
+                                // backgroundColor: 'red',
+                                // padding: 8
                             }}
                                 onPress={() => handelOpenModalFolderAction(item)}
                             >

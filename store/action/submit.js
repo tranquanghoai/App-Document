@@ -1,6 +1,8 @@
 import * as types from './types/submit'
 import FactoryService from '../../service/FactoryService'
 import { setListFile } from './file'
+import { showMessage, hideMessage } from "react-native-flash-message";
+import { getLastestSubmit } from './overview'
 
 const pushSubmittedFile = (submittedFile) => {
     return (dispatch) => {
@@ -22,20 +24,24 @@ export const setListSubmitFile = (listSubmitFile) => {
 
 export const getListSubmitFile = (filterFile = {}) => {
     return async (dispatch, getState) => {
-        try {
-            const filter = {
-                ...filterFile
+        return new Promise(async (resolve, reject) => {
+            try {
+                const filter = {
+                    ...filterFile
+                }
+                const response = await FactoryService.request('SubmitService').getList({ filter })
+                console.log(response.data.data, 'response')
+                let listSubmitFile = []
+                if (response?.data?.data) {
+                    listSubmitFile = response.data.data
+                }
+                resolve(true)
+                dispatch(setListSubmitFile(listSubmitFile))
+            } catch (error) {
+                reject(false)
+                console.log(error, 'error')
             }
-            const response = await FactoryService.request('SubmitService').getList({ filter })
-            console.log(response.data.data, 'response')
-            let listSubmitFile = []
-            if (response?.data?.data) {
-                listSubmitFile = response.data.data
-            }
-            dispatch(setListSubmitFile(listSubmitFile))
-        } catch (error) {
-            console.log(error, 'error')
-        }
+        })
     }
 }
 
@@ -43,9 +49,22 @@ export const handleSubmitFile = (description) => {
     return async (dispatch, getState) => {
         const handleFile = getState().file.handleFile
         if (handleFile) {
-            const response = await FactoryService.request('SubmitService').submit({ fileId: handleFile.id, description })
-            const submittedFile = response.data
-            dispatch(pushSubmittedFile(submittedFile))
+            try {
+                const response = await FactoryService.request('SubmitService').submit({ fileId: handleFile.id, description })
+                showMessage({
+                    message: "Trình Duyệt Tài Liệu Thành Công",
+                    type: "info",
+                });
+                const submittedFile = response.data
+                dispatch(pushSubmittedFile(submittedFile))
+                const isFromHome = getState().system.isFromHome
+                if (isFromHome) {
+                    dispatch(getLastestSubmit())
+                }
+            } catch (error) {
+
+            }
+
         }
     }
 }
@@ -65,12 +84,20 @@ export const cancelSubmitFile = () => {
             const selectSubmitFile = getState().submit.selectSubmitFile
             if (!selectSubmitFile) return
             await FactoryService.request('SubmitService').cancelSubmitFile(selectSubmitFile.id)
+            showMessage({
+                message: "Hủy Trình Duyệt Tài Liệu Thành Công",
+                type: "info",
+            });
             const listSubmitFile = [...getState().submit.listSubmitFile]
             const foundSubmitIndex = listSubmitFile.findIndex(s => s.id === selectSubmitFile.id)
             if (foundSubmitIndex !== -1) {
                 listSubmitFile.splice(foundSubmitIndex, 1)
             }
             dispatch(setListSubmitFile(listSubmitFile))
+            const isFromHome = getState().system.isFromHome
+            if (isFromHome) {
+                dispatch(getLastestSubmit())
+            }
         } catch (error) {
             console.log(error, 'erorr')
         }

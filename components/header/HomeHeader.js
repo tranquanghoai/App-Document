@@ -1,9 +1,11 @@
 import React from 'react'
-import { Text, TouchableOpacity } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 import Entypo from 'react-native-vector-icons/Entypo';
 import { Button, Header, Thumbnail } from 'native-base';
+import { useDispatch, useSelector } from 'react-redux'
 
 export default function HomeHeader({ navigation }) {
+    const employee = useSelector(state => state.auth.employee)
     const enterPersonalInfomation = () => {
         navigation.navigate('PersonalInfo')
     }
@@ -23,7 +25,9 @@ export default function HomeHeader({ navigation }) {
                 marginHorizontal: 8,
                 borderRadius: 20,
                 justifyContent: "center"
-            }}>
+            }}
+                onPress={() => navigation.push('Search')}
+            >
                 <Text style={{
                     fontSize: 18,
                     color: '#87878d',
@@ -33,11 +37,17 @@ export default function HomeHeader({ navigation }) {
             <TouchableOpacity
                 onPress={enterPersonalInfomation}
             >
-                <Thumbnail small
-                    source={{
-                        uri: "https://www.bridgestorecovery.com/wp-content/uploads/2017/10/Understanding-BPD-Emotional-Manipulation-Techniques-and-How-Treatment-Can-Help-1280x720.jpg"
-                    }}
-                />
+                <View style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    borderColor: '#f57811',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    <Text>{employee?.username ? employee.username[0] : '?'}</Text>
+                </View>
             </TouchableOpacity>
         </Header>
     )

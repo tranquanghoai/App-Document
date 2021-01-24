@@ -13,7 +13,9 @@ import { getListFile } from '../store/action/file'
 import FileHorizontalSubmit from './file/FileHorizontalSubmit';
 import FileVerticalSubmit from './file/FileVerticalSubmit';
 import FileVerticalShared from './file/FileVerticalShared';
+import FileHorizontalShare from './file/FileHorizontalShare';
 import { ActivityIndicator } from 'react-native';
+import { Image } from 'react-native';
 
 export default DocumentShared = ({ navigation }) => {
     const [folderIsHorizontal, setFolderHorizontal] = useState(false)
@@ -62,16 +64,30 @@ export default DocumentShared = ({ navigation }) => {
                                             setFolderHorizontal(!folderIsHorizontal)
                                         }}>
                                             {
-                                                folderIsHorizontal ? (<Entypo name="menu" color="#000" size={24} />)
-                                                    :
-                                                    (<AntDesign name="appstore-o" color="#000" size={24} />)
+                                                folderIsHorizontal ? (
+                                                    <React.Fragment>
+                                                        {
+                                                            listShare && listShare.length !== 0 && (
+                                                                <Entypo name="menu" color="#000" size={24} />
+                                                            )
+                                                        }
+                                                    </React.Fragment>
+                                                ) : (
+                                                        <React.Fragment>
+                                                            {
+                                                                listShare && listShare.length !== 0 && (
+                                                                    <AntDesign name="appstore-o" color="#000" size={24} />
+                                                                )
+                                                            }
+                                                        </React.Fragment>
+                                                    )
                                             }
                                         </TouchableOpacity>
                                     </View>
 
                                     {
                                         folderIsHorizontal ? (
-                                            <FileHorizontalSubmit listShare={listShare} navigation={navigation} />
+                                            <FileHorizontalShare listShare={listShare} navigation={navigation} />
                                         ) : (
                                                 <React.Fragment>
                                                     {
@@ -81,6 +97,37 @@ export default DocumentShared = ({ navigation }) => {
                                                     }
                                                 </React.Fragment>
                                             )
+                                    }
+
+                                    {
+                                        (!listShare || !listShare.length) && (
+                                            <View style={{
+                                                width: '100%',
+                                                height: '100%',
+                                            }}>
+
+                                                <Image
+                                                    style={[
+                                                        {
+                                                            width: 200,
+                                                            height: 200,
+                                                            // borderRadius: 80,
+                                                            marginTop: 20,
+                                                            alignSelf: 'center',
+                                                        }
+                                                    ]}
+                                                    source={require('../assets/document.png')}
+                                                />
+                                                <Text style={{
+                                                    fontSize: 22,
+                                                    textAlign: 'center',
+                                                    marginTop: 16,
+                                                    color: '#ccc',
+                                                    // fontStyle: 'italic'
+                                                }}>
+                                                    Tài Liệu Trống </Text>
+                                            </View>
+                                        )
                                     }
                                 </React.Fragment>
                             )

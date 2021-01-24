@@ -83,7 +83,7 @@ export default ModalFileSubmitAction = ({ navigation }) => {
     // const submitFile = () => {
     //     dispatch(closeModalFileSubmit())
     //     global.props.showConfirm(
-    //         'Nộp tài liệu',
+    //         'Trình Duyệt tài liệu',
     //         'Bạn có muốn nộp tệp tin đã chọn?',
     //         () => dispatch(selectSubmitFile())
     //     )
@@ -126,13 +126,17 @@ export default ModalFileSubmitAction = ({ navigation }) => {
             navigation.push('ImageFile', {
                 fileId: selectSubmitFile.fileId.id
             })
+        } else if (selectSubmitFile.fileId.type === 'form') {
+            navigation.push('FillForm', {
+                fileId: selectSubmitFile.fileId.id
+            })
         }
         dispatch(closeModalFileSubmit())
     }
 
     const cancleSubmit = () => {
         global.props.showConfirm(
-            'Hủy Nộp',
+            'Hủy Trình Duyệt',
             'Bạn có muốn hủy nộp tệp tin này?',
             () => dispatch(cancelSubmitFile())
         )
@@ -203,7 +207,7 @@ export default ModalFileSubmitAction = ({ navigation }) => {
                                     flex: 1,
                                 }}>
                                     <TouchableOpacity onPress={cancleSubmit}>
-                                        <FileAction iconName="edit" text="Hủy Nộp" />
+                                        <FileAction iconName="edit" text="Hủy Trình Duyệt" />
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={cancleSubmit}>
                                         <FileAction iconName="pushpino" text="Ghim" />

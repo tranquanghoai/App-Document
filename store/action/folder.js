@@ -1,6 +1,8 @@
 import * as types from './types/folder'
 import FactoryService from '../../service/FactoryService'
 import { setListFile } from './file'
+import { showMessage, hideMessage } from "react-native-flash-message";
+import { getLastestFolder, getLastestFavouriteFolder } from './overview'
 
 export const setListFolder = (folders) => {
     return (dispatch) => {
@@ -36,11 +38,20 @@ export const handleLikeFolder = () => {
             if (!handleFolder) return
             const payload = { like: handleFolder.like ? false : true }
             const response = await FactoryService.request('FolderService').update(handleFolder.id, payload)
+            showMessage({
+                message: handleFolder.like ? "Bỏ Thích Thư Mục Thành Công" : "Chọn Thích Thư Mục Thành Công",
+                type: "info",
+            });
             const updatedFolder = response.data
             const folders = [...getState().folder.folders]
             const foundFolder = folders.find(f => f.id === updatedFolder.id)
             if (foundFolder) {
                 foundFolder.like = updatedFolder.like
+            }
+            const isFromHome = getState().system.isFromHome
+            if (isFromHome) {
+                dispatch(getLastestFolder())
+                dispatch(getLastestFavouriteFolder())
             }
             dispatch(setListFolder(folders))
         } catch (error) {
@@ -61,6 +72,11 @@ export const handleUpdateFolder = (folderId, params) => {
                 foundFolder.description = updatedFolder.description
                 dispatch(setListFolder(listFolder))
                 resolve(response.data)
+                const isFromHome = getState().system.isFromHome
+                if (isFromHome) {
+                    dispatch(getLastestFolder())
+                    dispatch(getLastestFavouriteFolder())
+                }
             } catch (error) {
                 console.log(error, 'error')
                 reject()
@@ -76,12 +92,20 @@ export const handleDeleteFolder = () => {
                 const handleFolder = getState().folder.handleFolder
                 if (handleFolder) {
                     await FactoryService.request('FolderService').deleteFolder(handleFolder.id)
-                    console.log('Toi day khong')
+                    showMessage({
+                        message: 'Xóa Thư Mục Thành Công',
+                        type: "info",
+                    });
                     const listFolder = [...getState().folder.folders]
                     const foundFolderIndex = listFolder.findIndex(f => f.id === handleFolder.id)
                     if (foundFolderIndex !== -1) {
                         listFolder.splice(foundFolderIndex, 1)
                         dispatch(setListFolder(listFolder))
+                    }
+                    const isFromHome = getState().system.isFromHome
+                    if (isFromHome) {
+                        dispatch(getLastestFolder())
+                        dispatch(getLastestFavouriteFolder())
                     }
                     resolve()
                 }
@@ -172,7 +196,6 @@ export const getListFolder = (filterFolder = {}) => {
                     const parentFolderId = parentFolder.id
                     filter.parentId = parentFolderId
                 }
-                console.log(filterFolder, 'filterFolder')
                 const response = await FactoryService.request('FolderService').getList({ filter: filterFolder })
                 let folders = []
                 if (response?.data?.data) {
@@ -203,6 +226,9 @@ export const handleCreateFolder = (name, description) => {
                 const response = await FactoryService.request('FolderService').create(folder)
                 const createdFolder = response.data
                 dispatch(pushCreatedFolder(createdFolder))
+                const isFromHome = getState().system.isFromHome
+                dispatch(getLastestFolder())
+                dispatch(getLastestFavouriteFolder())
                 resolve(true)
             } catch (error) {
                 reject(false)

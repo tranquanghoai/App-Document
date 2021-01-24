@@ -1,7 +1,8 @@
 import * as types from './types/file'
 import FactoryService from '../../service/FactoryService'
 import RNFetchBlob from 'rn-fetch-blob';
-import { asin } from 'react-native-reanimated';
+import { getLastestFile, getLastestFavouriteFile, getLastestFavouriteFolder, getLastestSubmit } from './overview'
+import { showMessage, hideMessage } from "react-native-flash-message";
 
 export const setListFile = (files) => {
     return (dispatch) => {
@@ -19,10 +20,20 @@ export const handleLikeFile = () => {
             const files = [...getState().file.files]
             const like = handleFile.like ? false : true
             const response = await FactoryService.request('FileService').updateFile(handleFile.id, { like })
+            showMessage({
+                message: like ? "Chọn Thích Tệp Tin Thành Công" : "Bỏ Thích Tệp Tin Thành Công",
+                type: "info",
+            });
             const foundFile = files.find(f => f.id === handleFile.id)
             if (foundFile) {
                 foundFile.like = like
                 dispatch(setListFile(files))
+            }
+            const isFromHome = getState().system.isFromHome
+            if (isFromHome) {
+                dispatch(getLastestFile())
+                dispatch(getLastestFavouriteFile())
+                dispatch(getLastestFavouriteFolder())
             }
             return response.data
         } catch (error) {
@@ -39,16 +50,19 @@ export const getFileById = async (fileId) => {
 
 export const handleChooseFile = (fileId) => {
     return async (dispatch) => {
-        try {
-            const foundFile = await getFileById(fileId)
-            dispatch({
-                type: types.CHOOSE_CURRENT_FILE,
-                currentFile: foundFile
-            })
-        } catch (error) {
-            console.log(error, 'error')
-        }
-
+        return new Promise(async (resolve, reject) => {
+            try {
+                const foundFile = await getFileById(fileId)
+                dispatch({
+                    type: types.CHOOSE_CURRENT_FILE,
+                    currentFile: foundFile
+                })
+                resolve(true)
+            } catch (error) {
+                reject(false)
+                console.log(error, 'error')
+            }
+        })
     }
 }
 
@@ -81,6 +95,10 @@ export const handleTransferFolder = () => {
                 folderId: selectFolderTransfer ? selectFolderTransfer.id : undefined
             }
             await FactoryService.request('FileService').transferFile(tranferObj)
+            showMessage({
+                message: "Chuyển Thư Mục Thành Công",
+                type: "info",
+            });
         } catch (error) {
             console.log(error)
         }
@@ -123,11 +141,22 @@ export const handleDeleteFile = () => {
                 const handleFile = getState().file.handleFile
                 if (handleFile) {
                     await FactoryService.request('FileService').deleteFile(handleFile.id)
+                    showMessage({
+                        message: "Xóa Tệp Tin Thành Công",
+                        type: "info",
+                    });
                     const listFile = [...getState().file.files]
                     const foundFileIndex = listFile.findIndex(f => f.id === handleFile.id)
                     if (foundFileIndex !== -1) {
                         listFile.splice(foundFileIndex, 1)
                         dispatch(setListFile(listFile))
+                    }
+                    const isFromHome = getState().system.isFromHome
+                    if (isFromHome) {
+                        dispatch(getLastestFile())
+                        dispatch(getLastestFavouriteFile())
+                        dispatch(getLastestFavouriteFolder())
+                        dispatch(getLastestSubmit())
                     }
                     resolve()
                 }
@@ -154,6 +183,12 @@ export const handleCreateTextFile = (name, description, content) => {
                 console.log(response, 'response')
                 const createdFile = response.data
                 dispatch(pushCreatedFile(createdFile))
+                const isFromHome = getState().system.isFromHome
+                if (isFromHome) {
+                    dispatch(getLastestFile())
+                    dispatch(getLastestFavouriteFile())
+                    dispatch(getLastestFavouriteFolder())
+                }
                 resolve(true)
             } catch (error) {
                 console.log(error, 'error')
@@ -175,6 +210,12 @@ export const handleUpdateTextFile = (name, description, content) => {
                 console.log(response, 'response')
                 const updatedFile = response.data
                 // dispatch(pushCreatedFile(createdFile))
+                const isFromHome = getState().system.isFromHome
+                if (isFromHome) {
+                    dispatch(getLastestFile())
+                    dispatch(getLastestFavouriteFile())
+                    dispatch(getLastestFavouriteFolder())
+                }
                 resolve(true)
             } catch (error) {
                 console.log(error, 'error')
@@ -186,7 +227,7 @@ export const handleUpdateTextFile = (name, description, content) => {
 
 
 export const handleUpdateImageFile = (name, description, images) => {
-    console.log(name, description, images, 'name, description, images')
+    console.log({ name, description, images })
     return async (dispatch, getState) => {
         return new Promise(async (resolve, reject) => {
             try {
@@ -204,11 +245,16 @@ export const handleUpdateImageFile = (name, description, images) => {
                         data.push({ name: 'images', filename: fileName, type: image.mime, data: RNFetchBlob.wrap(image.path) })
                     }
                 }
-                // for(){}
-                // data.unshift({ name: 'attachFileIds', data: attachFileIds })
-                // for (let file of attachFileIds) {
-                // }
+                if (attachFileIds && attachFileIds.length) {
+                    data.unshift({ name: 'remainAttachFiles', data: JSON.stringify(attachFileIds) })
+                }
                 const response = await FactoryService.request('FileService').updateImageFile(data, currentFile.id)
+                const isFromHome = getState().system.isFromHome
+                if (isFromHome) {
+                    dispatch(getLastestFile())
+                    dispatch(getLastestFavouriteFile())
+                    dispatch(getLastestFavouriteFolder())
+                }
                 resolve(true)
             } catch (error) {
                 console.log(error, 'error')
@@ -235,9 +281,14 @@ export const handleCreateImageFile = (name, description, images) => {
                 const response = await FactoryService.request('FileService').createImageFile(data)
                 const createdFile = response.data
                 dispatch(pushCreatedFile(createdFile))
+                const isFromHome = getState().system.isFromHome
+                if (isFromHome) {
+                    dispatch(getLastestFile())
+                    dispatch(getLastestFavouriteFile())
+                    dispatch(getLastestFavouriteFolder())
+                }
                 resolve(true)
             } catch (error) {
-                console.log(error, 'error hoai')
                 reject(false)
             }
         })

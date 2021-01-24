@@ -83,8 +83,8 @@ export default ModalFileAction = ({ navigation }) => {
     const submitFile = () => {
         dispatch(closeModalFileAction())
         global.props.showConfirm(
-            'Nộp tài liệu',
-            'Bạn có muốn nộp tệp tin đã chọn?',
+            'Trình duyệt tài liệu',
+            'Bạn có muốn trình duyệt tệp tin đã chọn?',
             () => dispatch(handleSubmitFile())
         )
     }
@@ -189,7 +189,7 @@ export default ModalFileAction = ({ navigation }) => {
                                         <FileAction iconName="sharealt" text="Chia sẻ" />
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={submitFile}>
-                                        <FileAction iconName="upload" text="Nộp tệp tin" />
+                                        <FileAction iconName="upload" text="Trình duyệt tệp tin" />
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={transferFile}>
                                         <FileAction iconName="swap" text="Chuyển thư mục" />
@@ -200,9 +200,9 @@ export default ModalFileAction = ({ navigation }) => {
                                     <TouchableOpacity onPress={likeFile}>
                                         <FileAction iconName="like2" text={handleFile.like ? 'Xóa tệp tin khỏi danh mục yêu thích' : "Thêm vào danh sách yêu thích"} />
                                     </TouchableOpacity>
-                                    <TouchableOpacity onPress={downloadFile}>
+                                    {/* <TouchableOpacity onPress={downloadFile}>
                                         <FileAction iconName="download" text="Tải xuống" />
-                                    </TouchableOpacity>
+                                    </TouchableOpacity> */}
                                     <TouchableOpacity onPress={deleteFile}>
                                         <FileAction iconName="delete" text="Xóa" />
                                     </TouchableOpacity>

@@ -16,6 +16,10 @@ export default class FolderService extends BaseService {
 			return this.errorMsg(e)
 		}
 	}
+	async getLatestFolder(filter = {}) {
+		const res = await this.get(this.slug + `latest?${$param({ filter })}`)
+		return res.data
+	}
 	async create(folder = {}) {
 		try {
 			const res = await this.post(this.slug + `create`, folder)

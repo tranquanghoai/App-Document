@@ -1,6 +1,8 @@
 import * as types from './types/share'
 import FactoryService from '../../service/FactoryService'
 import { setListFile } from './file'
+import { showMessage, hideMessage } from "react-native-flash-message";
+
 
 export const handleShareFile = (range, shareWith = []) => {
     return async (dispatch, getState) => {
@@ -8,6 +10,10 @@ export const handleShareFile = (range, shareWith = []) => {
             const handleFile = getState().file.handleFile
             if (handleFile) {
                 const response = await FactoryService.request('ShareDocumentService').shareFile({ fileId: handleFile.id, range, shareWith })
+                showMessage({
+                    message: "Chia Sẽ Tệp Tin Thành Công",
+                    type: "info",
+                });
                 const submittedFile = response.data
                 console.log(submittedFile, 'submittedFile')
                 // dispatch(pushSubmittedFile(submittedFile))
@@ -16,6 +22,34 @@ export const handleShareFile = (range, shareWith = []) => {
             console.log(error, 'error')
         }
 
+    }
+}
+
+export const handleUpdateShareFile = (range, shareWith = []) => {
+    return async (dispatch, getState) => {
+        try {
+            const handleShare = getState().share.handleShare
+            if (handleShare) {
+                const response = await FactoryService.request('ShareDocumentService').updateShareFile(handleShare.id, { range, shareWith })
+                showMessage({
+                    message: "Cập Nhật Chia Sẽ Tệp Tin Thành Công",
+                    type: "info",
+                });
+                dispatch(getListShareFile())
+            }
+        } catch (error) {
+            console.log(error, 'error')
+        }
+
+    }
+}
+
+export const chooseHandleShare = (shareDoc) => {
+    return (dispatch) => {
+        dispatch({
+            type: types.SET_HANDLE_SHARE,
+            handleShare: shareDoc
+        })
     }
 }
 
@@ -29,14 +63,14 @@ export const setListShare = (listShare) => {
 }
 
 
-export const getListShareFile = (filterShare) => {
+
+export const getListShareFile = (filterShare = {}) => {
     return async (dispatch, getState) => {
         return new Promise(async (resolve, reject) => {
             try {
                 const filter = {
-                    ...filterShare.filter
+                    ...filterShare
                 }
-                filterShare.filter = filter
                 const response = await FactoryService.request('ShareDocumentService').getList({ filter })
                 let listShare = []
                 console.log(response, 'response')
@@ -52,6 +86,23 @@ export const getListShareFile = (filterShare) => {
         })
 
 
+    }
+}
+
+export const handleOwnerDeleteShare = () => {
+    return async (dispatch, getState) => {
+        try {
+            const handleShare = getState().share.handleShare
+            if (!handleShare) return
+            const response = await FactoryService.request('ShareDocumentService').ownerDeleteShare(handleShare.id)
+            showMessage({
+                message: "Ngừng Chia Sẽ Tệp Tin Thành Công",
+                type: "info",
+            });
+            dispatch(getListShareFile())
+        } catch (error) {
+
+        }
     }
 }
 

@@ -3,7 +3,7 @@ import { View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'r
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Foundation from 'react-native-vector-icons/Foundation';
 import { useSelector, useDispatch } from "react-redux";
-import { closeModalAddDocument, openModalCreateFolder } from '../../store/action/system'
+import { closeModalAddDocument, openModalCreateFolder, openModalSelectForm } from '../../store/action/system'
 import { selectHandleFolder } from '../../store/action/folder'
 const CreateNewDoc = (props) => {
     const { name, onHandlePress } = props
@@ -57,6 +57,11 @@ export default ModalAddDocument = ({ navigation }) => {
     const onHandleCreateGeneralFile = () => {
         dispatch(closeModalAddDocument())
         navigation.navigate('GeneralFile')
+    }
+
+    const onHandleSelectForm = () => {
+        dispatch(closeModalAddDocument())
+        dispatch(openModalSelectForm())
     }
     return (
         <Modal
@@ -120,7 +125,7 @@ export default ModalAddDocument = ({ navigation }) => {
                             <CreateNewDoc name="Tệp Tin" onHandlePress={onHandleCreateGeneralFile}>
                                 <AntDesign name="upload" color="#f57811" size={20} />
                             </CreateNewDoc>
-                            <CreateNewDoc name="Biểu mẫu">
+                            <CreateNewDoc name="Biểu mẫu" onHandlePress={onHandleSelectForm}>
                                 <AntDesign name="form" color="#f57811" size={20} />
                             </CreateNewDoc>
                         </View>

@@ -194,7 +194,7 @@ export default function GeneralFile({ navigation, route }) {
                             let source
                             if (item.id) {
                                 source = {
-                                    uri: `http://192.168.1.11:3000/attach-file/${item.id}`,
+                                    uri: `${domain}/attach-file/${item.id}`,
                                     headers: { Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZUlkIjoiNWY4ODI1ZGNiYmY5MTEzZTA4MDU1Nzg3IiwiZGV2aWNlSWQiOiIyY2FmZWYzZC1lZGJhLTQ3Y2ItYWNhZC1lNWRkYzE4OTliYjkiLCJpYXQiOjE2MDgwMTc4NzYsImV4cCI6MTYxMDYwOTg3Nn0.irLi3pRRO4PlpXMosOYqnLTJTZivxN2KFXFyeQX1L8o" }
                                 }
                             } else {
